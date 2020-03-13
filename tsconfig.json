@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "outDir": "./public/",
+    "noImplicitAny": false,
+    "module": "ESNext",
+    "target": "ES2017",
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true
+  }
+}
