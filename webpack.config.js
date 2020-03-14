@@ -1,10 +1,11 @@
 const path = require('path');
 
 var config = {
-    entry: './src/script.ts',
+    entry: './src/main.ts',
     mode: 'development',
     module: {
-        rules: [{
+        rules: [
+            {
                 test: /\.(ts|js)$/,
                 use: 'ts-loader',
                 exclude: /node_modules/,
@@ -13,7 +14,7 @@ var config = {
                 test: /\.(css|html)$/,
                 loader: 'file-loader',
                 options: {
-                    name: '[name].[ext]'
+                    name: '[name].[ext]',
                 }
             },
         ]
@@ -25,9 +26,20 @@ var config = {
         },
     },
     output: {
-        filename: 'script.js',
+        filename: 'app.bundle.js',
         path: path.resolve(__dirname, 'dist'),
     },
+    optimization: {
+        splitChunks: {
+            cacheGroups: {
+                commons: {
+                    test: /[\\/]node_modules[\\/]/,
+                    name: 'vendors',
+                    chunks: 'all'
+                }
+            }
+        }
+    }
 };
 
 module.exports = (env, argv) => {
