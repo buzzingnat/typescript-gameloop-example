@@ -3,3 +3,6 @@ Run multiple canvas animations simultaneously against a background. Have one of 
 
 ## Compile step
 in terminal: `npx webpack`
+
+## Build for github pages
+`npx webpack --mode production`
