@@ -1,4 +1,6 @@
 import 'normalize.css'; // do once for app
+import 'app/style.css';
+import 'app/index.html';
 
 const CANVAS = document.createElement("canvas");
 const CANVAS_WIDTH = 750; // a standard 2019 smartphone size
