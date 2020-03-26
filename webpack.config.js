@@ -61,7 +61,7 @@ var config = {
     },
     output: {
         filename: 'app.bundle.js',
-        path: path.resolve(__dirname, 'dist'),
+        path: path.resolve(__dirname, 'dev'),
     },
     optimization: {
         splitChunks: {
@@ -79,7 +79,7 @@ var config = {
 module.exports = (env, argv) => {
     if (argv.mode === 'development') {
         config.mode = 'development';
-        config.output.path = path.resolve(__dirname, 'dist');
+        config.output.path = path.resolve(__dirname, 'dev');
     }
 
     if (argv.mode === 'production') {

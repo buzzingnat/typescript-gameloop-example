@@ -35,7 +35,6 @@ export function moveSprite(sprite: Sprite, movementSpeed: number): void {
         sprite.y -= movementSpeed;
         sprite.direction = sprite.imageRows.up;
         sprite.directionString = 'up';
-        console.log(getState().pressedKeys);
     } else if (getState().pressedKeys.s || getState().pressedKeys.ArrowDown) {
         sprite.y += movementSpeed;
         sprite.direction = sprite.imageRows.down;
