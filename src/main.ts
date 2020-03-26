@@ -1,9 +1,9 @@
 // main.ts
 import 'normalize.css'; // do once for app
-import 'app/style.css'; // get webpack to build files correctly
+import 'app/style/style.css'; // get webpack to build files correctly
 import 'app/index.html'; // get webpack to build files correctly
 
-import { CANVAS, CANVAS_WIDTH, CANVAS_HEIGHT, CANVAS_SCALE, CTX, ELEMENT, TIME, START_TIME } from './constants';
+import { CANVAS, CANVAS_WIDTH, CANVAS_HEIGHT, CANVAS_SCALE, CTX, ELEMENT } from './constants';
 import { state, getState } from './state';
 import { requireImage } from './utils';
 import { drawSprite, moveSprite, autoPilotSprite } from './animate';
@@ -11,22 +11,22 @@ import { drawSprite, moveSprite, autoPilotSprite } from './animate';
 CANVAS.width = CANVAS_WIDTH / CANVAS_SCALE;
 CANVAS.height = CANVAS_HEIGHT / CANVAS_SCALE;
 
-let lastRender = 0;
+let lastRender: number = 0;
 
-const backgroundImage = requireImage(
+const backgroundImage: HTMLImageElement = requireImage(
     "https://opengameart.org/sites/default/files/preview_241.png"
 );
 
-function update(progress) {
+function update(progress: number): void {
     // update the state of the world for elapsed time since last render
-    moveSprite(state.character, 3);
-    autoPilotSprite(state.chicken, 2);
+    moveSprite(state.character, 1);
+    autoPilotSprite(state.snail, 1);
     autoPilotSprite(state.grimReaper, 1);
-    autoPilotSprite(state.snake, 1);
+    autoPilotSprite(state.turtle, 1);
     state.time += progress;
 }
 
-function draw() {
+function draw(): void {
     CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
     CTX.imageSmoothingEnabled = false;
     // draw state of the world
@@ -41,15 +41,15 @@ function draw() {
         CANVAS_WIDTH,
         CANVAS_HEIGHT
     );
-    drawSprite(state.chicken);
+    drawSprite(state.turtle);
     drawSprite(state.grimReaper);
-    drawSprite(state.snake);
+    drawSprite(state.snail);
     drawSprite(state.character);
 }
 
-function loop(timestamp) {
+function loop(timestamp: number): void {
     window.requestAnimationFrame(loop);
-    let progress = timestamp - lastRender;
+    let progress: number = timestamp - lastRender;
 
     update(progress);
     draw();
@@ -58,12 +58,12 @@ function loop(timestamp) {
 }
 
 window.addEventListener("keydown", keyDownListener, false);
-function keyDownListener(event) {
+function keyDownListener(event: KeyboardEvent): void {
     state.pressedKeys[event.key] = true;
 }
 
 window.addEventListener("keyup", keyUpListener, false);
-function keyUpListener(event) {
+function keyUpListener(event: KeyboardEvent): void {
     state.pressedKeys[event.key] = false;
 }
 

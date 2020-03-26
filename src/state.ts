@@ -1,45 +1,91 @@
 import { requireImage } from './utils';
 
-export let state: any = {
+import woman from 'gfx/woman.png';
+import man from 'gfx/man.png';
+import personTan from 'gfx/person-tan.png';
+import sprites from 'gfx/sprites.png';
+
+export interface Sprite {
+    image: HTMLImageElement,
+    x: number,
+    y: number,
+    height: number,
+    width: number,
+    scale: number,
+    currentFrame: number,
+    walkFrames: number[],
+    attackFrames?: {
+        down: number[],
+        up: number[],
+        left: number[],
+        right: number[],
+    },
+    frameRate: number,
+    direction: number,
+    directionString: 'up' | 'down' | 'left' | 'right',
+    animationTime: number,
+    name: string,
+    imageRows: {
+        down: number,
+        up: number,
+        left: number,
+        right: number,
+    },
+    isAttacking: boolean,
+}
+
+interface State {
+    time: number,
+    character: Sprite,
+    grimReaper: Sprite,
+    turtle: Sprite,
+    snail: Sprite,
+    pressedKeys: {[key in string]: boolean},
+}
+
+export let state: State = {
     time: 0,
     character: {
-        // Will be set when the image is loaded.
-        image: requireImage(
-            "https://opengameart.org/sites/default/files/Green-Cap-Character-16x18.png"
-        ),
+        image: requireImage(woman),
         x: 0,
         y: 0,
-        height: 18,
-        width: 16,
-        scale: 2,
+        height: 32,
+        width: 32,
+        scale: 1,
         currentFrame: 0,
-        frameArray: [0, 1, 0, 2],
-        frameRate: 4,
+        walkFrames: [0, 1, 0, 2],
+        attackFrames: {
+            down: [0, 3, 3, 1],
+            up: [0, 3, 3, 2],
+            left: [0, 3, 3, 2],
+            right: [0, 3, 3, 2],
+        },
+        frameRate: 5,
         direction: 0,
+        directionString: 'up',
         animationTime: 0,
         name: "character",
         imageRows: {
-            down: 0,
-            up: 1,
-            left: 2,
+            down: 2,
+            up: 0,
+            left: 1,
             right: 3
-        }
+        },
+        isAttacking: false
     },
     grimReaper: {
-        // Will be set when the image is loaded.
         // by poikilos, Underworld Load comprehensive top view RPG tileset 32x32 some 16x24 16x16
-        image: requireImage(
-            "https://opengameart.org/sites/default/files/underworld_load-atlas-32x32_1.png"
-        ),
+        image: requireImage(sprites),
         x: 30,
         y: 60,
         height: 32,
         width: 32,
-        scale: 1.5,
+        scale: 1,
         currentFrame: 0,
-        frameArray: [3, 4, 5],
+        walkFrames: [3, 4, 3, 5],
         frameRate: 5,
         direction: 0,
+        directionString: 'up',
         animationTime: 0,
         name: "grimReaper",
         imageRows: {
@@ -47,57 +93,58 @@ export let state: any = {
             up: 0,
             left: 1,
             right: 3
-        }
+        },
+        isAttacking: false
     },
-    chicken: {
-        // by daneeklu, LPC style farm animals
-        image: requireImage(
-            "https://opengameart.org/sites/default/files/chicken_walk.png"
-        ),
+    turtle: {
+        // by poikilos, Underworld Load comprehensive top view RPG tileset 32x32 some 16x24 16x16
+        image: requireImage(sprites),
         x: 120,
         y: 210,
         height: 32,
         width: 32,
-        scale: 1.25,
+        scale: 1,
         currentFrame: 0,
-        frameArray: [0, 1, 2, 3],
+        walkFrames: [0, 1, 0, 2],
         frameRate: 5,
         direction: 0,
+        directionString: 'up',
         animationTime: 0,
-        name: "chicken",
+        name: "turtle",
         imageRows: {
-            down: 2,
-            up: 0,
-            left: 1,
-            right: 3
-        }
+            down: 6,
+            up: 4,
+            left: 5,
+            right: 7
+        },
+        isAttacking: false
     },
-    snake: {
-        // by basxto and yolkati, [LPC] snake
-        image: requireImage(
-            "https://opengameart.org/sites/default/files/snake-NESW_0.png"
-        ),
+    snail: {
+        // by poikilos, Underworld Load comprehensive top view RPG tileset 32x32 some 16x24 16x16
+        image: requireImage(sprites),
         x: 60,
         y: 280,
         height: 32,
         width: 32,
-        scale: 1.5,
+        scale: 1,
         currentFrame: 0,
-        frameArray: [0, 1, 2],
+        walkFrames: [0, 1, 0, 2],
         frameRate: 5,
         direction: 0,
+        directionString: 'up',
         animationTime: 0,
-        name: "snake",
+        name: "snail",
         imageRows: {
-            down: 2,
-            up: 0,
-            left: 3,
-            right: 1
-        }
+            down: 10,
+            up: 8,
+            left: 9,
+            right: 11
+        },
+        isAttacking: false
     },
     pressedKeys: {}
 };
 
-export function getState() {
+export function getState(): State {
     return state;
 }

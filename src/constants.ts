@@ -1,12 +1,10 @@
-const CANVAS = document.createElement("canvas");
-const CANVAS_WIDTH = 750; // a standard 2019 smartphone size
-const CANVAS_HEIGHT = 1334; // a standard 2019 smartphone size
-const CANVAS_SCALE = 3;
-const CTX = CANVAS.getContext("2d");
+const CANVAS: HTMLCanvasElement = document.createElement("canvas");
+const CANVAS_WIDTH: number = 750; // a standard 2019 smartphone size
+const CANVAS_HEIGHT: number = 1334; // a standard 2019 smartphone size
+const CANVAS_SCALE: number = 3;
+const CTX: CanvasRenderingContext2D = CANVAS.getContext("2d");
 
-const ELEMENT = document.getElementById("app");
+const ELEMENT: HTMLElement = document.getElementById("app");
 ELEMENT.append(CANVAS);
-const TIME = new Date(Date.now()).toLocaleTimeString();
-const START_TIME = Date.now();
 
-export { CANVAS, CANVAS_WIDTH, CANVAS_HEIGHT, CANVAS_SCALE, CTX, ELEMENT, TIME, START_TIME };
+export { CANVAS, CANVAS_WIDTH, CANVAS_HEIGHT, CANVAS_SCALE, CTX, ELEMENT };
