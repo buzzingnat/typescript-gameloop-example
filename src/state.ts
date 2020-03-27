@@ -20,6 +20,7 @@ export interface Sprite {
         left: number[],
         right: number[],
     },
+    deathFrames: number[],
     frameRate: number,
     direction: number,
     directionString: 'up' | 'down' | 'left' | 'right',
@@ -30,9 +31,16 @@ export interface Sprite {
         up: number,
         left: number,
         right: number,
+        death?: number,
     },
-    isAttacking: boolean,
     path?: ('up' | 'down' | 'left' | 'right')[],
+    actorStats: {
+        health: number,
+        range: number,
+        damage: number,
+    },
+    attackTarget: (null | Sprite),
+
 }
 
 export interface State {
@@ -62,6 +70,7 @@ export let state: State = {
             left: [0, 3, 3, 2],
             right: [0, 3, 3, 2],
         },
+        deathFrames: [4],
         frameRate: 5,
         direction: 0,
         directionString: 'up',
@@ -71,9 +80,15 @@ export let state: State = {
             down: 2,
             up: 0,
             left: 1,
-            right: 3
+            right: 3,
+            death: 0,
         },
-        isAttacking: false
+        actorStats: {
+            health: 10,
+            range: 2,
+            damage: 3,
+        },
+        attackTarget: null,
     },
     grimReaper: {
         // by poikilos, Underworld Load comprehensive top view RPG tileset 32x32 some 16x24 16x16
@@ -85,6 +100,13 @@ export let state: State = {
         scale: 1,
         currentFrame: 0,
         walkFrames: [3, 4, 3, 5],
+        attackFrames: {
+            down: [3, 3],
+            up: [3, 3],
+            left: [3, 3],
+            right: [3, 3],
+        },
+        deathFrames: [9], // 10 across, 9 down
         frameRate: 5,
         direction: 0,
         directionString: 'up',
@@ -94,9 +116,15 @@ export let state: State = {
             down: 2,
             up: 0,
             left: 1,
-            right: 3
+            right: 3,
+            death: 10,
         },
-        isAttacking: false
+        actorStats: {
+            health: 7,
+            range: 2,
+            damage: 2,
+        },
+        attackTarget: null,
     },
     turtle: {
         // by poikilos, Underworld Load comprehensive top view RPG tileset 32x32 some 16x24 16x16
@@ -108,6 +136,13 @@ export let state: State = {
         scale: 1,
         currentFrame: 0,
         walkFrames: [0, 1, 0, 2],
+        attackFrames: {
+            down: [0, 0],
+            up: [0, 0],
+            left: [0, 0],
+            right: [0, 0],
+        },
+        deathFrames: [10], // 10 across, 10 down
         frameRate: 5,
         direction: 0,
         directionString: 'up',
@@ -117,27 +152,15 @@ export let state: State = {
             down: 6,
             up: 4,
             left: 5,
-            right: 7
+            right: 7,
+            death: 10,
         },
-        isAttacking: false,
-        path: [
-            'down',
-            'down',
-            'left',
-            'left',
-            'up',
-            'up',
-            'right',
-            'right',
-            'up',
-            'up',
-            'right',
-            'right',
-            'down',
-            'down',
-            'left',
-            'left'
-        ]
+        actorStats: {
+            health: 12,
+            range: 1,
+            damage: 1,
+        },
+        attackTarget: null,
     },
     snail: {
         // by poikilos, Underworld Load comprehensive top view RPG tileset 32x32 some 16x24 16x16
@@ -149,6 +172,13 @@ export let state: State = {
         scale: 1,
         currentFrame: 0,
         walkFrames: [0, 1, 0, 2],
+        attackFrames: {
+            down: [0, 0],
+            up: [0, 0],
+            left: [0, 0],
+            right: [0, 0],
+        },
+        deathFrames: [13], // 9 across, 13 down
         frameRate: 5,
         direction: 0,
         directionString: 'up',
@@ -158,14 +188,22 @@ export let state: State = {
             down: 10,
             up: 8,
             left: 9,
-            right: 11
+            right: 11,
+            death: 9,
         },
-        isAttacking: false
+        actorStats: {
+            health: 7,
+            range: 1,
+            damage: 1,
+        },
+        attackTarget: null,
     },
     actors: [],
     pressedKeys: {}
 };
+window['state'] = state;
 
 export function getState(): State {
     return state;
 }
+window['getState'] = getState;

@@ -92,6 +92,6 @@ function keyUpListener(event: KeyboardEvent): void {
 }
 
 window.addEventListener('load', (event) => {
-    populateActors(getState(), 4)
+    populateActors(getState(), 9)
 });
 window.requestAnimationFrame(loop);

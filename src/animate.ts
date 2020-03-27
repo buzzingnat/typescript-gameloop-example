@@ -1,15 +1,29 @@
 import { getState, State, Sprite } from './state';
 import { CANVAS, CTX } from './constants';
 
+function getFrameTime(framesPerSecond: number): number {
+    return Math.floor((getState().time / 1000) * framesPerSecond);
+}
+
 export function drawSprite(sprite: Sprite): void {
     // Cannot draw this sprite until its image is loaded.
     if (!sprite.image) {
         return;
     }
     const fps = sprite.frameRate;
-    let frame = Math.floor((getState().time / 1000) * fps);
+    let frame = getFrameTime(fps);
     let imageRow: number;
-    if (sprite.isAttacking && sprite.attackFrames) {
+    let imageColumn = sprite.direction;
+    if (sprite.actorStats.health <= 0) {
+        // show dead body
+        if (sprite.imageRows.death || sprite.imageRows.death === 0) {
+            imageRow = sprite.imageRows.death;
+        } else {
+            imageRow = sprite.imageRows.down;
+        }
+        frame = frame % sprite.deathFrames.length;
+        imageColumn = sprite.deathFrames[frame];
+    } else if (sprite.attackTarget && sprite.attackFrames) {
         frame = frame % sprite.attackFrames[sprite.directionString].length;
         imageRow = sprite.attackFrames[sprite.directionString][frame];
     } else {
@@ -19,7 +33,7 @@ export function drawSprite(sprite: Sprite): void {
     CTX.drawImage(
         sprite.image,
         imageRow * sprite.width,
-        sprite.direction * sprite.height,
+        imageColumn * sprite.height,
         sprite.width,
         sprite.height,
         sprite.x,
@@ -50,8 +64,7 @@ function moveSpriteRight(sprite: Sprite, movementSpeed: number) {
     sprite.directionString = 'right';
 }
 
-export function moveSprite(sprite: Sprite, movementSpeed: number): void {
-    const state: State = getState();
+function detectKeyInputsForMovement(state: State, sprite: Sprite, movementSpeed: number) {
     // process key inputs stored on state
     if (state.pressedKeys.w || state.pressedKeys.ArrowUp) {
         moveSpriteUp(sprite, movementSpeed);
@@ -63,27 +76,9 @@ export function moveSprite(sprite: Sprite, movementSpeed: number): void {
     } else if (state.pressedKeys.d || state.pressedKeys.ArrowRight) {
         moveSpriteRight(sprite, movementSpeed);
     }
-    if (state.pressedKeys[' '] || state.pressedKeys.c) {
-        sprite.isAttacking = true;
-    } else {
-        sprite.isAttacking = false;
-    }
-    // collision detection with other actors
-    const victim: Sprite = detectCollision(sprite, state.actors);
-    if (victim) {
-        const mh = movementSpeed+sprite.height/2;
-        const mw = movementSpeed+sprite.width/2;
-        if (sprite.directionString === 'up') {
-            moveSpriteDown(sprite, mh);
-        } else if (sprite.directionString === 'down') {
-            moveSpriteUp(sprite, mh);
-        } else if (sprite.directionString === 'left') {
-            moveSpriteRight(sprite, mw);
-        } else {
-            moveSpriteLeft(sprite, mw);
-        }
-    }
-    // Detect boundaries
+}
+
+function detectGameBoundaries(sprite: Sprite) {
     let width = CANVAS.width - sprite.width * sprite.scale;
     if (sprite.x > width) {
         sprite.x = width;
@@ -98,22 +93,54 @@ export function moveSprite(sprite: Sprite, movementSpeed: number): void {
     }
 }
 
-export function detectCollision(sprite: Sprite, allActors: Sprite[]): Sprite {
+function beginCombat(attacker: Sprite, defender: Sprite) {
+    attacker.attackTarget = defender;
+    defender.attackTarget = attacker;
+}
+
+function detectCollision(sprite: Sprite, allActors: Sprite[]): Sprite {
     // if x is < or > sprite value OR y is < or > sprite value, then NO COLLISION
-    let actor: Sprite;
-    for (actor of allActors) {
-        let isCollision: boolean = false;
-        if (actor === sprite) {
-            return;
+    for (const actor of allActors) {
+        if (actor === sprite || actor.actorStats.health <= 0) {
+            continue;
         }
         if (actor.x + actor.width < sprite.x) { // actor left of sprite
         } else if (actor.x > sprite.x + sprite.width) { // actor right of sprite
-        } else if (actor.y + actor.height < sprite.y) { // actor left of sprite
-        } else if (actor.y > sprite.y + sprite.height) { // actor right of sprite
+        } else if (actor.y + actor.height < sprite.y) { // actor below sprite
+        } else if (actor.y > sprite.y + sprite.height) { // actor above sprite
         } else {
             return actor;
         }
     }
+}
+
+function handleCollision(sprite: Sprite, state: State, movementSpeed: number): void {
+    const victim: Sprite = detectCollision(sprite, [...state.actors, state.character]);
+    if (victim) {
+        beginCombat(sprite, victim);
+    }
+}
+
+function followPredefinedPath(sprite: Sprite, movementSpeed: number, direction: ('up' | 'down' | 'left' | 'right')) {
+    if (direction === 'up') {
+        moveSpriteUp(sprite, movementSpeed);
+    } else if (direction === 'down') {
+        moveSpriteDown(sprite, movementSpeed);
+    }
+    if (direction === 'left') {
+        moveSpriteLeft(sprite, movementSpeed);
+    } else if (direction === 'right') {
+        moveSpriteRight(sprite, movementSpeed);
+    }
+}
+
+export function moveSprite(sprite: Sprite, movementSpeed: number): void {
+    const state: State = getState();
+    detectKeyInputsForMovement(state, sprite, movementSpeed);
+    // collision detection with other actors
+    handleCollision(sprite, state, movementSpeed);
+    // Detect boundaries
+    detectGameBoundaries(sprite);
 }
 
 export function autoPilotSprite(sprite: Sprite, movementSpeed: number): void {
@@ -121,52 +148,24 @@ export function autoPilotSprite(sprite: Sprite, movementSpeed: number): void {
     // determine frame
     const fps = sprite.frameRate / 2;
     let frame: number = Math.floor((state.time / 1000) * fps);
-    let direction: string = sprite.path[frame % sprite.path.length];
+    let direction: ('up' | 'down' | 'left' | 'right') = sprite.path[frame % sprite.path.length];
     // update sprite object with new coordinates at correct frame
-    if (direction === 'up') {
-        sprite.y -= movementSpeed;
-        sprite.direction = sprite.imageRows.up;
-        sprite.directionString = 'up';
-    } else if (direction === 'down') {
-        sprite.y += movementSpeed;
-        sprite.direction = sprite.imageRows.down;
-        sprite.directionString = 'down';
+    if (sprite.actorStats.health <= 0) {
+        return;
     }
-    if (direction === 'left') {
-        sprite.x -= movementSpeed;
-        sprite.direction = sprite.imageRows.left;
-        sprite.directionString = 'left';
-    } else if (direction === 'right') {
-        sprite.x += movementSpeed;
-        sprite.direction = sprite.imageRows.right;
-        sprite.directionString = 'left';
-    }
-    // collision detection with other actors
-    const victim: Sprite = detectCollision(sprite, state.actors);
-    if (victim) {
-        const mh = movementSpeed+sprite.height/2;
-        const mw = movementSpeed+sprite.width/2;
-        if (sprite.directionString === 'up') {
-            moveSpriteDown(sprite, mh);
-        } else if (sprite.directionString === 'down') {
-            moveSpriteUp(sprite, mh);
-        } else if (sprite.directionString === 'left') {
-            moveSpriteRight(sprite, mw);
-        } else {
-            moveSpriteLeft(sprite, mw);
+    if (sprite.attackTarget && sprite.attackTarget.actorStats) {
+        sprite.attackTarget.actorStats.health -= sprite.actorStats.damage;
+        if (sprite.attackTarget.actorStats.health <= 0) {
+            sprite.attackTarget = null;
         }
+        // do not move
+        // deal damage to character as long as it has health
+        // if character is dead, then end attack
+    } else {
+        followPredefinedPath(sprite, movementSpeed, direction);
+        // collision detection with other actors
+        handleCollision(sprite, state, movementSpeed);
     }
     // Detect boundaries
-    let width: number = CANVAS.width - sprite.width * sprite.scale;
-    if (sprite.x > width) {
-        sprite.x = width;
-    } else if (sprite.x < 0) {
-        sprite.x = 0;
-    }
-    let height: number = CANVAS.height - sprite.height * sprite.scale;
-    if (sprite.y > height) {
-        sprite.y = height;
-    } else if (sprite.y < 0) {
-        sprite.y = 0;
-    }
+    detectGameBoundaries(sprite);
 }
