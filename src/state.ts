@@ -32,14 +32,16 @@ export interface Sprite {
         right: number,
     },
     isAttacking: boolean,
+    path?: ('up' | 'down' | 'left' | 'right')[],
 }
 
-interface State {
+export interface State {
     time: number,
     character: Sprite,
     grimReaper: Sprite,
     turtle: Sprite,
     snail: Sprite,
+    actors: Sprite[],
     pressedKeys: {[key in string]: boolean},
 }
 
@@ -64,7 +66,7 @@ export let state: State = {
         direction: 0,
         directionString: 'up',
         animationTime: 0,
-        name: "character",
+        name: 'character',
         imageRows: {
             down: 2,
             up: 0,
@@ -87,7 +89,7 @@ export let state: State = {
         direction: 0,
         directionString: 'up',
         animationTime: 0,
-        name: "grimReaper",
+        name: 'grimReaper',
         imageRows: {
             down: 2,
             up: 0,
@@ -110,14 +112,32 @@ export let state: State = {
         direction: 0,
         directionString: 'up',
         animationTime: 0,
-        name: "turtle",
+        name: 'turtle',
         imageRows: {
             down: 6,
             up: 4,
             left: 5,
             right: 7
         },
-        isAttacking: false
+        isAttacking: false,
+        path: [
+            'down',
+            'down',
+            'left',
+            'left',
+            'up',
+            'up',
+            'right',
+            'right',
+            'up',
+            'up',
+            'right',
+            'right',
+            'down',
+            'down',
+            'left',
+            'left'
+        ]
     },
     snail: {
         // by poikilos, Underworld Load comprehensive top view RPG tileset 32x32 some 16x24 16x16
@@ -133,7 +153,7 @@ export let state: State = {
         direction: 0,
         directionString: 'up',
         animationTime: 0,
-        name: "snail",
+        name: 'snail',
         imageRows: {
             down: 10,
             up: 8,
@@ -142,6 +162,7 @@ export let state: State = {
         },
         isAttacking: false
     },
+    actors: [],
     pressedKeys: {}
 };
 
