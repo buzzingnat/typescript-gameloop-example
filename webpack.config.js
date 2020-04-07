@@ -62,17 +62,6 @@ var config = {
     output: {
         filename: 'app.bundle.js',
         path: path.resolve(__dirname, 'dev'),
-    },
-    optimization: {
-        splitChunks: {
-            cacheGroups: {
-                commons: {
-                    test: /[\\/]node_modules[\\/]/,
-                    name: 'vendors',
-                    chunks: 'all'
-                }
-            }
-        }
     }
 };
 

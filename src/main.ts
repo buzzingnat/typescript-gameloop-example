@@ -9,6 +9,8 @@ import { State, getState, Sprite } from './state';
 import { requireImage } from './utils';
 import { drawSprite, moveSprite, autoPilotSprite } from './animate';
 
+console.log('I run');
+
 CANVAS.width = CANVAS_WIDTH / CANVAS_SCALE;
 CANVAS.height = CANVAS_HEIGHT / CANVAS_SCALE;
 
@@ -43,9 +45,15 @@ function update(progress: number): void {
     // update the state of the world for elapsed time since last render
     const state = getState();
     for (const sprite of state.actors) {
-        autoPilotSprite(sprite, 1);
+        // only move if sprite has health
+        if (sprite.actorStats.health > 0) {
+            autoPilotSprite(sprite, 1);
+        }
     }
-    moveSprite(state.character, 1);
+    // only move if character has health
+    if (state.character.actorStats.health > 0) {
+        moveSprite(state.character, 1);
+    }
     state.time += progress;
 }
 
