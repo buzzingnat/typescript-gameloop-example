@@ -1,17 +1,13 @@
 import { getState, State, Sprite } from './state';
 import { CANVAS, CTX } from './constants';
 
-function getFrameTime(framesPerSecond: number): number {
-    return Math.floor((getState().time / 1000) * framesPerSecond);
-}
-
 export function drawSprite(sprite: Sprite): void {
     // Cannot draw this sprite until its image is loaded.
     if (!sprite.image) {
         return;
     }
     const fps = sprite.frameRate;
-    let frame = getFrameTime(fps);
+    let frame = Math.floor((getState().time / 1000) * fps);
     let imageRow: number;
     let imageColumn = sprite.direction;
     if (sprite.actorStats.health <= 0) {
@@ -95,6 +91,7 @@ function detectGameBoundaries(sprite: Sprite) {
 
 function beginCombat(attacker: Sprite, defender: Sprite) {
     attacker.attackTarget = defender;
+    attacker.nextAttack = getState().time;
     defender.attackTarget = attacker;
 }
 
@@ -104,10 +101,10 @@ function detectCollision(sprite: Sprite, allActors: Sprite[]): Sprite {
         if (actor === sprite || actor.actorStats.health <= 0) {
             continue;
         }
-        if (actor.x + actor.width < sprite.x) { // actor left of sprite
-        } else if (actor.x > sprite.x + sprite.width) { // actor right of sprite
-        } else if (actor.y + actor.height < sprite.y) { // actor below sprite
-        } else if (actor.y > sprite.y + sprite.height) { // actor above sprite
+        if (actor.x + actor.width*actor.scale < sprite.x) { // actor left of sprite
+        } else if (actor.x > sprite.x + sprite.width*actor.scale) { // actor right of sprite
+        } else if (actor.y + actor.height*actor.scale < sprite.y) { // actor below sprite
+        } else if (actor.y > sprite.y + sprite.height*actor.scale) { // actor above sprite
         } else {
             return actor;
         }
@@ -136,11 +133,13 @@ function followPredefinedPath(sprite: Sprite, movementSpeed: number, direction: 
 
 export function moveSprite(sprite: Sprite, movementSpeed: number): void {
     const state: State = getState();
-    detectKeyInputsForMovement(state, sprite, movementSpeed);
-    // collision detection with other actors
-    handleCollision(sprite, state, movementSpeed);
-    // Detect boundaries
-    detectGameBoundaries(sprite);
+    if (!sprite.attackTarget) {
+        detectKeyInputsForMovement(state, sprite, movementSpeed);
+        // collision detection with other actors
+        handleCollision(sprite, state, movementSpeed);
+        // Detect boundaries
+        detectGameBoundaries(sprite);
+    }
 }
 
 export function autoPilotSprite(sprite: Sprite, movementSpeed: number): void {
@@ -153,19 +152,20 @@ export function autoPilotSprite(sprite: Sprite, movementSpeed: number): void {
     if (sprite.actorStats.health <= 0) {
         return;
     }
-    if (sprite.attackTarget && sprite.attackTarget.actorStats) {
-        sprite.attackTarget.actorStats.health -= sprite.actorStats.damage;
-        if (sprite.attackTarget.actorStats.health <= 0) {
-            sprite.attackTarget = null;
-        }
-        // do not move
-        // deal damage to character as long as it has health
-        // if character is dead, then end attack
-    } else {
+    if (!sprite.attackTarget) {
         followPredefinedPath(sprite, movementSpeed, direction);
         // collision detection with other actors
         handleCollision(sprite, state, movementSpeed);
+        // Detect boundaries
+        detectGameBoundaries(sprite);
     }
-    // Detect boundaries
-    detectGameBoundaries(sprite);
+}
+
+export function displayTextAlert(text: string, x:number, y:number) {
+    CTX.font = '20px sans-serif';
+    CTX.fillStyle = 'red';
+    CTX.textAlign = 'center';
+    CTX.fillText(text, x, y);
+    CTX.strokeStyle = 'pink';
+    CTX.strokeText(text, x, y);
 }

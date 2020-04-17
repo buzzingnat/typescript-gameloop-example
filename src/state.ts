@@ -36,11 +36,11 @@ export interface Sprite {
     path?: ('up' | 'down' | 'left' | 'right')[],
     actorStats: {
         health: number,
-        range: number,
         damage: number,
+        attackSpeed: number,
     },
     attackTarget: (null | Sprite),
-
+    nextAttack: (null | number),
 }
 
 export interface State {
@@ -57,11 +57,11 @@ export let state: State = {
     time: 0,
     character: {
         image: requireImage(woman),
-        x: 0,
-        y: 0,
+        x: 10,
+        y: 10,
         height: 32,
         width: 32,
-        scale: 1,
+        scale: 2,
         currentFrame: 0,
         walkFrames: [0, 1, 0, 2],
         attackFrames: {
@@ -84,11 +84,12 @@ export let state: State = {
             death: 0,
         },
         actorStats: {
-            health: 10,
-            range: 2,
+            health: 100,
             damage: 3,
+            attackSpeed: 500,
         },
         attackTarget: null,
+        nextAttack: null,
     },
     grimReaper: {
         // by poikilos, Underworld Load comprehensive top view RPG tileset 32x32 some 16x24 16x16
@@ -97,7 +98,7 @@ export let state: State = {
         y: 60,
         height: 32,
         width: 32,
-        scale: 1,
+        scale: 2,
         currentFrame: 0,
         walkFrames: [3, 4, 3, 5],
         attackFrames: {
@@ -120,11 +121,12 @@ export let state: State = {
             death: 10,
         },
         actorStats: {
-            health: 7,
-            range: 2,
+            health: 70,
             damage: 2,
+            attackSpeed: 300,
         },
         attackTarget: null,
+        nextAttack: null,
     },
     turtle: {
         // by poikilos, Underworld Load comprehensive top view RPG tileset 32x32 some 16x24 16x16
@@ -133,7 +135,7 @@ export let state: State = {
         y: 210,
         height: 32,
         width: 32,
-        scale: 1,
+        scale: 2,
         currentFrame: 0,
         walkFrames: [0, 1, 0, 2],
         attackFrames: {
@@ -156,11 +158,12 @@ export let state: State = {
             death: 10,
         },
         actorStats: {
-            health: 12,
-            range: 1,
+            health: 60,
             damage: 1,
+            attackSpeed: 300,
         },
         attackTarget: null,
+        nextAttack: null,
     },
     snail: {
         // by poikilos, Underworld Load comprehensive top view RPG tileset 32x32 some 16x24 16x16
@@ -169,7 +172,7 @@ export let state: State = {
         y: 280,
         height: 32,
         width: 32,
-        scale: 1,
+        scale: 2,
         currentFrame: 0,
         walkFrames: [0, 1, 0, 2],
         attackFrames: {
@@ -192,11 +195,12 @@ export let state: State = {
             death: 9,
         },
         actorStats: {
-            health: 7,
-            range: 1,
+            health: 20,
             damage: 1,
+            attackSpeed: 300,
         },
         attackTarget: null,
+        nextAttack: null,
     },
     actors: [],
     pressedKeys: {}

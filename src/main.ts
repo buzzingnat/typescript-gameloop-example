@@ -7,9 +7,7 @@ import _ from 'lodash';
 import { CANVAS, CANVAS_WIDTH, CANVAS_HEIGHT, CANVAS_SCALE, CTX, ELEMENT } from './constants';
 import { State, getState, Sprite } from './state';
 import { requireImage } from './utils';
-import { drawSprite, moveSprite, autoPilotSprite } from './animate';
-
-console.log('I run');
+import { drawSprite, moveSprite, autoPilotSprite, displayTextAlert } from './animate';
 
 CANVAS.width = CANVAS_WIDTH / CANVAS_SCALE;
 CANVAS.height = CANVAS_HEIGHT / CANVAS_SCALE;
@@ -41,20 +39,63 @@ function populateActors(state: State, quantity: number): void {
     }
 }
 
+function updateAttackStatus (sprite: Sprite, state: State):void {
+    if (sprite.attackTarget) {
+        // do not move
+        // if opponent is dead, then end attack
+        if (sprite.attackTarget.actorStats.health <= 0) {
+            sprite.attackTarget = null;
+            sprite.nextAttack = null;
+        }
+        // also need an nextAttack value that is the next time actor can attack;
+        // update this with every attack, check to see when you can next attack
+        else if (state.time >= sprite.nextAttack) {
+            // do damage at attack speed of sprite
+            sprite.attackTarget.actorStats.health -= sprite.actorStats.damage;
+            sprite.nextAttack = state.time + sprite.actorStats.attackSpeed;
+            // console.log(`****`);
+            // console.log(`****`);
+            // console.log(`${sprite.name}:${sprite.actorStats.health} is attacking ${sprite.attackTarget.name}:${sprite.attackTarget.actorStats.health} for ${sprite.actorStats.damage}`);
+            // console.log(`----`);
+            // console.log(`current time: ${state.time}`);
+            // console.log(`next attack time: ${sprite.nextAttack}`);
+        }
+    }
+}
+
 function update(progress: number): void {
     // update the state of the world for elapsed time since last render
     const state = getState();
-    for (const sprite of state.actors) {
-        // only move if sprite has health
-        if (sprite.actorStats.health > 0) {
-            autoPilotSprite(sprite, 1);
+    const character = state.character;
+    // if the actor has an attack target, do damage to enemy at attack speed of actor
+    // character calculated before all other actors
+    if (character.actorStats.health > 0) {
+        if (character.attackTarget) {
+            updateAttackStatus(character, state);
+        } else {
+            // only move if character has health AND character is NOT attacking
+            moveSprite(state.character, 1);
         }
     }
-    // only move if character has health
-    if (state.character.actorStats.health > 0) {
-        moveSprite(state.character, 1);
+    for (const sprite of state.actors) {
+        if (sprite.actorStats.health > 0) {
+            if (!sprite.attackTarget) {
+                // only move if sprite has health AND sprite is NOT attacking
+                autoPilotSprite(sprite, 1);
+            } else {
+                updateAttackStatus(sprite, state);
+            }
+        }
     }
     state.time += progress;
+}
+
+function drawDot(x, y) {
+    CTX.beginPath();
+    CTX.arc(x,y,10,0*Math.PI,1.5*Math.PI);
+    CTX.closePath();
+    CTX.fillStyle = 'rgb(100, 20, 20, 50%)';
+    CTX.fill();
 }
 
 function draw(): void {
@@ -74,7 +115,15 @@ function draw(): void {
         CANVAS_HEIGHT
     );
     for (const sprite of state.actors) {
+        // TODO: draw all dead actors before any living ones
         drawSprite(sprite);
+    }
+    if (true) {
+        displayTextAlert(
+            'stunned',
+            state.character.x+(state.character.width/2)*state.character.scale,
+            state.character.y-2
+        );
     }
     drawSprite(state.character);
 }
